@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"testing"
@@ -28,6 +29,30 @@ func mockDb(f func(*Database)) {
 
 func TestOpenDatabase(t *testing.T) {
 	mockDb(func(_ *Database) {})
+}
+
+func TestOpenFail(t *testing.T) {
+	dir, err := ioutil.TempDir("", "go-gdbm-test_")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(dir)
+
+	file := filepath.Join(dir, "doesnt-exist")
+	db, err := OpenConfig(&Config{
+		File: file,
+		Mode: Writer,
+	})
+
+	if db != nil {
+		db.Close()
+		os.Remove(file)
+		t.Error("non-nil Database returned")
+	} else if err == nil {
+		t.Error("nil Database and nil error returned")
+	} else if !os.IsNotExist(err) {
+		t.Error("unexpected error:", err)
+	}
 }
 
 func TestFetchNotPresent(t *testing.T) {
