@@ -154,7 +154,7 @@ func toDatum(data []byte) C.datum {
 		size = len(data)
 	} else if data != nil {
 		// GDBM requires a non-NULL pointer, but the size is zero so it can be arbitrary
-		ptr = unsafe.Pointer(&data)
+		ptr = unsafe.Pointer(uintptr(1))
 	}
 	return C.datum{
 		dptr:  (*C.char)(ptr),
