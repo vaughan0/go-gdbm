@@ -1,3 +1,4 @@
+// Package gdbm provides support for the GNU database manager.
 package gdbm
 
 /*
