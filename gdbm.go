@@ -87,6 +87,7 @@ func (d *Database) Close() {
 	C.gdbm_close(d.dbf)
 }
 
+// Returns the name of the database file.
 func (d *Database) File() string {
 	return d.file
 }
