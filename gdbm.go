@@ -26,7 +26,8 @@ const (
 )
 
 type Database struct {
-	dbf C.GDBM_FILE
+	file string
+	dbf  C.GDBM_FILE
 }
 
 type Config struct {
@@ -66,7 +67,7 @@ func OpenConfig(config *Config) (*Database, error) {
 			val := C.int(config.CacheSize)
 			C.gdbm_setopt(dbf, C.GDBM_CACHESIZE, &val, C.int(unsafe.Sizeof(val)))
 		}
-		return &Database{dbf}, nil
+		return &Database{config.File, dbf}, nil
 	}
 	return nil, err
 }
@@ -84,6 +85,10 @@ func Open(file string) (*Database, error) {
 // Closes the database and releases all associated resources.
 func (d *Database) Close() {
 	C.gdbm_close(d.dbf)
+}
+
+func (d *Database) File() string {
+	return d.file
 }
 
 // Returns the data associated with a given key, or nil if the key is not
@@ -155,7 +160,7 @@ func toDatum(data []byte) C.datum {
 		size = len(data)
 	} else if data != nil {
 		// GDBM requires a non-NULL pointer, but the size is zero so it can be arbitrary
-		ptr = unsafe.Pointer(uintptr(1))
+		ptr = unsafe.Pointer(&data)
 	}
 	return C.datum{
 		dptr:  (*C.char)(ptr),
